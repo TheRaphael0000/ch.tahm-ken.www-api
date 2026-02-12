@@ -5,7 +5,7 @@ import fabric
 
 
 def deploy(c):
-    with c.cd("/opt/api.tahm-ken.ch"):
+    with c.cd("/opt/ch.tahm-ken.www-api"):
         c.run("git fetch")
         c.run("git status")
         if not click.confirm("Stash and deploy to main ?", default=True):
