@@ -2,9 +2,9 @@ FROM python:alpine
 
 WORKDIR /app
 
-COPY ./requirements.txt .
+COPY ./pyproject.toml .
 
-RUN pip install -r requirements.txt
+RUN pip install .
 
 COPY ./app .
 

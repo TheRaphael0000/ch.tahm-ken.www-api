@@ -1,0 +1,14 @@
+[project]
+name = "ch-tahm-ken-www-api"
+version = "0.1.0"
+description = "Tahm-Ken.ch API"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi[standard]>=0.136.1",
+    "ics>=0.7.3",
+    "python-dotenv>=1.2.2",
+    "redis>=7.4.0",
+    "requests>=2.34.0",
+    "slowapi>=0.1.9",
+]
