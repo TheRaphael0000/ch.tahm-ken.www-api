@@ -21,4 +21,4 @@ def matches_ids(puuid, **args):
     return query(f"/lol/match/v5/matches/by-puuid/{puuid}/ids?{arguments}", expire=600)
 
 def match(matchId):
-    return query(f"/lol/match/v5/matches/{matchId}", expire=60*60*24*7)
+    return query(f"/lol/match/v5/matches/{matchId}", expire=60*60*24*14)
