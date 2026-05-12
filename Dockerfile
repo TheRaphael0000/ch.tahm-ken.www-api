@@ -1,5 +1,8 @@
 FROM python:alpine
 
+ARG VERSION_ARG
+ENV VERSION=$VERSION_ARG
+
 WORKDIR /app
 
 # dependencies

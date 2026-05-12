@@ -1,6 +1,6 @@
 from .riot_api_routes import account_by_riot_id, challenges_player_data, champion_masteries, summoner
 
-def challenges_player_data(region:str, gameNamesTags: str):
+def challenges_players_data(region:str, gameNamesTags: str):
     accounts = []
     gameNamesParsed = [tuple(gameNameTag.split("-")) for gameNameTag in set(gameNamesTags.split(","))]
 
