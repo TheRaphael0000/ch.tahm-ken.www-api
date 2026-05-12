@@ -18,7 +18,7 @@ def league_entries(puuid, region):
 
 def matches_ids(puuid, **args):
     arguments = urlencode(args, doseq=True)
-    return query(f"/lol/match/v5/matches/by-puuid/{puuid}/ids?{arguments}", expire=600)
+    return query(f"/lol/match/v5/matches/by-puuid/{puuid}/ids?{arguments}", expire=60*60*2)
 
 def match(matchId):
     return query(f"/lol/match/v5/matches/{matchId}", expire=60*60*24*14)
