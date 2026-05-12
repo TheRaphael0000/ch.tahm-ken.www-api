@@ -2,10 +2,14 @@ FROM python:alpine
 
 WORKDIR /app
 
+# dependencies
 COPY ./pyproject.toml .
-
 RUN pip install .
 
-COPY ./app .
+# app
+COPY ./app app
 
-CMD ["fastapi", "run", "--host", "0.0.0.0", "--port", "80"]
+# entrypoint script
+COPY ./docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["docker-entrypoint.sh"]
