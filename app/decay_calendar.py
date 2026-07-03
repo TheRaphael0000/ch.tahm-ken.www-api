@@ -1,6 +1,6 @@
 from .riot_api_routes import account_by_riot_id, league_entries, matches_ids, summoner, match
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, time
 from ics import Calendar, Event
 
 
@@ -8,8 +8,9 @@ from ics import Calendar, Event
 class DecayRules:
     BANKED_DAYS_PER_MATCH: int
     MAXIMUM_BANKED_DAYS: int
-    INITIAL_DAYS_BEFORE_DECAY:int
+    INITIAL_DAYS_BEFORE_DECAY: int
     LP_LOST_ON_DECAY: int
+
 
 APEX_RULE = DecayRules(1, 14, 14, 75)
 DECAY_RULES = {
@@ -29,7 +30,8 @@ QUEUE_TYPE_LABEL = {
     "RANKED_FLEX_SR": "FLEX",
 }
 
-def decay_calendar(region:str, gameNameTag: str):
+
+def decay_calendar(region: str, gameNameTag: str):
     calendar = Calendar()
     calendar.creator = "Tahm-ken.ch - Decay Calendar"
 
@@ -62,6 +64,7 @@ def decay_calendar(region:str, gameNameTag: str):
         print(e)
         pass
 
+
 def compute_queue_decay(league_entry):
     queue_id = QUEUE_TYPE_MAP.get(league_entry.get("queueType"))
     puuid = league_entry.get("puuid")
@@ -69,25 +72,38 @@ def compute_queue_decay(league_entry):
     matches_ids_ = matches_ids(puuid, queue=queue_id)
 
     banked_days = 0
-    now = datetime.now(tz=timezone.utc)
-    max_time = now -  timedelta(days=rules.INITIAL_DAYS_BEFORE_DECAY)
+
+    last_match = match(matches_ids_[0])
+    last_match_gameEndTimestamp = datetime.fromtimestamp(
+        last_match.get("info").get("gameEndTimestamp") / 1000.0, tz=timezone.utc)
+    max_time = last_match_gameEndTimestamp - \
+        timedelta(days=rules.MAXIMUM_BANKED_DAYS)
 
     for m in matches_ids_:
-        if banked_days >= rules.MAXIMUM_BANKED_DAYS:
-            break
-
         match_ = match(m)
-        gameEndTimestamp = datetime.fromtimestamp(match_.get("info").get("gameEndTimestamp") / 1000.0, tz=timezone.utc)
+        is_remake = any([p["gameEndedInEarlySurrender"]
+                        for p in match_.get("info").get("participants")])
+        if is_remake:
+            continue
 
+        gameEndTimestamp = datetime.fromtimestamp(match_.get(
+            "info").get("gameEndTimestamp") / 1000.0, tz=timezone.utc)
+
+        print(gameEndTimestamp, max_time, banked_days)
         if gameEndTimestamp < max_time:
+            # game too old, can't be providing bank days
             break
 
         banked_days += rules.BANKED_DAYS_PER_MATCH
 
-    banked_days = min(banked_days, rules.MAXIMUM_BANKED_DAYS)
-    last_match = match(matches_ids_[0])
-    last_match_gameEndTimestamp = datetime.fromtimestamp(last_match.get("info").get("gameEndTimestamp") / 1000.0, tz=timezone.utc)
+        if banked_days >= rules.MAXIMUM_BANKED_DAYS:
+            # maximal banked days reached
+            break
 
-    decay_date = last_match_gameEndTimestamp + timedelta(days=banked_days)
+    # to be sure
+    banked_days = min(banked_days, rules.MAXIMUM_BANKED_DAYS)
+
+    decay_date = datetime.combine(last_match_gameEndTimestamp.date(
+    ) + timedelta(days=banked_days), time(hour=22, minute=45, second=0), tzinfo=timezone.utc)
 
     return decay_date
