@@ -1,27 +1,27 @@
 services:
-  api:
-    container_name: tahmkenchapi
-    build: .
-    env_file:
-      - .env
-    environment: # override .env since we want to use the redis from below
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    networks:
-      - redis-network
-      - nginx
-    restart: unless-stopped
+    app:
+        container_name: tahmkenchapi
+        image: ghcr.io/theraphael0000/ch.tahm-ken.www-api:latest
+        env_file: .env
+        environment:
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+        networks:
+            - nginx
+            - redis_network
 
-  redis:
-    extends:
-      file: compose-dev.yaml
-      service: redis
-    ports: !override []
-    networks:
-      - redis-network
+    redis:
+        container_name: redis
+        image: redis:7
+        volumes:
+            - ./redis/redis.conf:/redis.conf
+        command: ["redis-server", "/redis.conf"]
+        restart: unless-stopped
+        networks:
+          - redis_network
 
 networks:
-  redis-network:
-  nginx:
-    external: true
-    name: nginx
+    nginx:
+        external: true
+        name: nginx
+    redis_network:

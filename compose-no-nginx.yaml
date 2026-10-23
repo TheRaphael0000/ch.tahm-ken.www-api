@@ -1,0 +1,25 @@
+services:
+    app:
+        container_name: tahmkenchapi
+        image: ghcr.io/theraphael0000/ch.tahm-ken.www-api:latest
+        env_file: .env
+        environment:
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+        ports:
+            - 80:80
+        networks:
+            - redis_network
+
+    redis:
+        container_name: redis
+        image: redis:7
+        volumes:
+            - ./redis/redis.conf:/redis.conf
+        command: ["redis-server", "/redis.conf"]
+        restart: unless-stopped
+        networks:
+          - redis_network
+
+networks:
+    redis_network:

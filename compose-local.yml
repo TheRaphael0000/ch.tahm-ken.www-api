@@ -1,0 +1,20 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                - VERSION_ARG=${TAG:-dev}
+        env_file: .env
+        environment: # override redis socket if set in env_file
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+        ports:
+            - 80:80
+
+    redis:
+        container_name: redis
+        image: redis:7
+        volumes:
+            - ./redis/redis.conf:/redis.conf
+        command: ["redis-server", "/redis.conf"]
